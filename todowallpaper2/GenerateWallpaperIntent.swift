@@ -61,13 +61,6 @@ struct GenerateWallpaperIntent: AppIntent {
             throw GenerateError.compressionFailed
         }
 
-        // Save to photo library album (best effort — don't crash if this fails)
-        do {
-            try await PhotoLibraryManager.saveToAlbum(image)
-        } catch {
-            print("Warning: Failed to save to album: \(error)")
-        }
-
         // Return the image as an IntentFile so Shortcuts can pipe it
         // to "Set Wallpaper" or any other action
         let file = IntentFile(
