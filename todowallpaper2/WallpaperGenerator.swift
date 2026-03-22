@@ -49,7 +49,7 @@ class WallpaperGenerator {
         // would double-scale the output.
         renderer.scale = 1.0
 
-        return renderer.uiImage
+        return renderer.uiImage.flatMap { Self.removeAlpha(from: $0) }
     }
 
     /// Generates a wallpaper with custom size (useful for different device types)
@@ -68,6 +68,18 @@ class WallpaperGenerator {
         let renderer = ImageRenderer(content: template)
         renderer.scale = 1.0
 
-        return renderer.uiImage
+        return renderer.uiImage.flatMap { Self.removeAlpha(from: $0) }
+    }
+
+    /// Re-draws the image into an opaque bitmap context to strip the alpha channel.
+    /// This prevents the "AlphaPremulLast" warning when saving as JPEG and halves
+    /// the memory needed to decode the image.
+    private static func removeAlpha(from image: UIImage) -> UIImage? {
+        let size = image.size
+        UIGraphicsBeginImageContextWithOptions(size, true, image.scale)
+        image.draw(at: .zero)
+        let opaqueImage = UIGraphicsGetImageFromCurrentImageContext()
+        UIGraphicsEndImageContext()
+        return opaqueImage
     }
 }

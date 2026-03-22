@@ -23,7 +23,7 @@ struct GenerateWallpaperIntent: AppIntent {
     static let openAppWhenRun: Bool = true
 
     @MainActor
-    func perform() async throws -> some IntentResult & ReturnsValue<IntentFile> & ProvidesDialog {
+    func perform() async throws -> some IntentResult & ReturnsValue<IntentFile> {
         // Small delay to let the app's UI context initialize when launched by Shortcuts
         try? await Task.sleep(for: .milliseconds(500))
 
@@ -79,10 +79,7 @@ struct GenerateWallpaperIntent: AppIntent {
             type: .jpeg
         )
 
-        return .result(
-            value: file,
-            dialog: "Your wallpaper has been generated with \(todos.count) todos."
-        )
+        return .result(value: file)
     }
 
     enum GenerateError: Error, CustomLocalizedStringResourceConvertible {
