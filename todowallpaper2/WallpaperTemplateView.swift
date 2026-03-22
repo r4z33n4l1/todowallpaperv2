@@ -54,17 +54,6 @@ struct WallpaperTemplateView: View {
                 Spacer()
                     .frame(height: 140 * scaleFactor) // Status bar clearance
 
-                // Date header
-                VStack(alignment: .leading, spacing: 8 * scaleFactor) {
-                    Text(Date(), format: .dateTime.weekday(.wide))
-                        .font(.system(size: 22 * scaleFactor, weight: .medium))
-                        .foregroundStyle(.white.opacity(0.5))
-
-                    Text(Date(), format: .dateTime.month(.wide).day())
-                        .font(.system(size: 36 * scaleFactor, weight: .bold))
-                        .foregroundStyle(.white)
-                }
-
                 // Stats bar
                 HStack(spacing: 16 * scaleFactor) {
                     // Progress ring

@@ -7,17 +7,16 @@
 
 import SwiftUI
 
-/// Device-frame preview view before saving the wallpaper.
+/// Generates wallpaper, auto-saves to Photos, and shows a preview.
 struct WallpaperPreviewView: View {
     let todos: [TodoItem]
     @Environment(\.dismiss) private var dismiss
 
     @State private var generatedImage: UIImage?
     @State private var isGenerating = false
-    @State private var isSaving = false
     @State private var showError = false
     @State private var errorMessage = ""
-    @State private var showSuccess = false
+    @State private var savedSuccessfully = false
     @State private var showPermissionDenied = false
     @State private var previewScale: CGFloat = 0.9
     @State private var previewOpacity: Double = 0
@@ -25,7 +24,6 @@ struct WallpaperPreviewView: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                // Dark gradient background
                 LinearGradient(
                     colors: [Color(hex: "0F0F1A"), Color(hex: "1A1A2E")],
                     startPoint: .top,
@@ -61,42 +59,36 @@ struct WallpaperPreviewView: View {
 
                         Spacer()
 
-                        // Save button
-                        VStack(spacing: 16) {
-                            Button {
-                                Task {
-                                    await saveToPhotos()
+                        // Status
+                        VStack(spacing: 12) {
+                            if savedSuccessfully {
+                                HStack(spacing: 8) {
+                                    Image(systemName: "checkmark.circle.fill")
+                                        .foregroundStyle(.green)
+                                    Text("Saved to Taskwall album")
+                                        .font(.subheadline.weight(.semibold))
+                                        .foregroundStyle(.white)
                                 }
-                            } label: {
-                                HStack(spacing: 10) {
-                                    if isSaving {
-                                        ProgressView()
-                                            .tint(.white)
-                                    } else {
-                                        Image(systemName: "square.and.arrow.down")
-                                            .font(.body.weight(.semibold))
-                                        Text("Save to Photos")
-                                            .font(.body.weight(.semibold))
-                                    }
-                                }
-                                .frame(maxWidth: .infinity)
-                                .padding(.vertical, 16)
-                                .background(
-                                    LinearGradient(
-                                        colors: [.cyan, .blue],
-                                        startPoint: .leading,
-                                        endPoint: .trailing
-                                    )
-                                )
-                                .foregroundStyle(.white)
-                                .clipShape(RoundedRectangle(cornerRadius: 16))
+                                .transition(.scale.combined(with: .opacity))
                             }
-                            .disabled(isSaving)
 
-                            Text("Saved wallpapers appear in your **Taskwall** album")
-                                .font(.caption)
-                                .foregroundStyle(.white.opacity(0.4))
-                                .multilineTextAlignment(.center)
+                            Button {
+                                dismiss()
+                            } label: {
+                                Text("Done")
+                                    .font(.body.weight(.semibold))
+                                    .frame(maxWidth: .infinity)
+                                    .padding(.vertical, 16)
+                                    .background(
+                                        LinearGradient(
+                                            colors: [.cyan, .blue],
+                                            startPoint: .leading,
+                                            endPoint: .trailing
+                                        )
+                                    )
+                                    .foregroundStyle(.white)
+                                    .clipShape(RoundedRectangle(cornerRadius: 16))
+                            }
                         }
                         .padding(.horizontal, 24)
                         .padding(.bottom, 8)
@@ -107,7 +99,7 @@ struct WallpaperPreviewView: View {
                             .scaleEffect(1.2)
                             .tint(.cyan)
 
-                        Text("Generating wallpaper...")
+                        Text("Generating & saving...")
                             .font(.subheadline.weight(.medium))
                             .foregroundStyle(.white.opacity(0.6))
                     }
@@ -129,13 +121,6 @@ struct WallpaperPreviewView: View {
             } message: {
                 Text(errorMessage)
             }
-            .alert("Wallpaper Saved", isPresented: $showSuccess) {
-                Button("Done") {
-                    dismiss()
-                }
-            } message: {
-                Text("Your wallpaper has been saved to the Taskwall album in Photos.")
-            }
             .alert("Photo Access Required", isPresented: $showPermissionDenied) {
                 Button("Open Settings") {
                     if let url = URL(string: UIApplication.openSettingsURLString) {
@@ -151,12 +136,12 @@ struct WallpaperPreviewView: View {
         .presentationDragIndicator(.visible)
         .presentationCornerRadius(28)
         .task {
-            await generateWallpaper()
+            await generateAndSave()
         }
     }
 
     @MainActor
-    private func generateWallpaper() async {
+    private func generateAndSave() async {
         isGenerating = true
         defer { isGenerating = false }
 
@@ -164,27 +149,24 @@ struct WallpaperPreviewView: View {
 
         generatedImage = WallpaperGenerator.generate(todos: todos)
 
-        if generatedImage == nil {
+        guard let image = generatedImage else {
             errorMessage = "Failed to generate wallpaper image."
             showError = true
-        } else {
-            // Animate preview in
-            withAnimation(.spring(duration: 0.6, bounce: 0.2)) {
-                previewScale = 1.0
-                previewOpacity = 1.0
-            }
+            return
         }
-    }
 
-    private func saveToPhotos() async {
-        guard let image = generatedImage else { return }
+        // Animate preview in
+        withAnimation(.spring(duration: 0.6, bounce: 0.2)) {
+            previewScale = 1.0
+            previewOpacity = 1.0
+        }
 
-        isSaving = true
-        defer { isSaving = false }
-
+        // Auto-save to Photos
         do {
             try await PhotoLibraryManager.saveToAlbum(image)
-            showSuccess = true
+            withAnimation {
+                savedSuccessfully = true
+            }
         } catch is PhotoLibraryManager.PhotoError {
             showPermissionDenied = true
         } catch {

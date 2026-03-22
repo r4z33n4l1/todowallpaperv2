@@ -19,14 +19,11 @@ struct GenerateWallpaperIntent: AppIntent {
         categoryName: "Productivity"
     )
 
-    // Open the app briefly — ImageRenderer needs a UI context to render
-    static let openAppWhenRun: Bool = true
+    // Run silently in the background — no app launch
+    static let openAppWhenRun: Bool = false
 
     @MainActor
     func perform() async throws -> some IntentResult & ReturnsValue<IntentFile> {
-        // Small delay to let the app's UI context initialize when launched by Shortcuts
-        try? await Task.sleep(for: .milliseconds(500))
-
         // Access the shared SwiftData container
         let schema = Schema([TodoItem.self])
         let config = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)

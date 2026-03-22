@@ -415,11 +415,6 @@ struct AutoWallpaperGuideView: View {
                 .tracking(1.2)
 
             faqItem(
-                question: "Why does the app open briefly?",
-                answer: "The wallpaper renderer needs a UI context to draw your task list. The app opens, generates the image, and the shortcut sets it — all in about 2 seconds."
-            )
-
-            faqItem(
                 question: "What if Set Wallpaper fails sometimes?",
                 answer: "iOS 18 has a known bug where \"Set Wallpaper\" can fail on some devices. A workaround: create a second automation with the same actions, delayed by 1 minute, as a backup."
             )
