@@ -39,7 +39,7 @@ struct AutoWallpaperGuideView: View {
                             isChecked: $step1Done,
                             icon: "clock.badge.checkmark",
                             title: "Create a new Automation",
-                            detail: "Open the Shortcuts app → Automations tab → tap +. Choose a trigger: \"Time of Day\" (e.g. 7 AM daily), \"When App is Opened/Closed\", or \"When Charger Connected\"."
+                            detail: "Open Shortcuts → Automations → tap +. Recommended trigger: \"App\" → select Taskwall → choose \"Is Closed\". This way your wallpaper updates every time you leave the app after editing tasks. Other good triggers: \"Time of Day\" (e.g. 7 AM) or \"Charger Connected\"."
                         )
 
                         checklistItem(
