@@ -11,7 +11,7 @@ import UIKit
 /// Service for managing photo library operations, specifically saving wallpapers to a custom album.
 class PhotoLibraryManager {
 
-    static let albumName = "TodoWallpaper"
+    static let albumName = "Taskwall"
 
     enum AuthResult {
         case authorized

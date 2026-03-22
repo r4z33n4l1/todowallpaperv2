@@ -21,6 +21,7 @@ struct TodoListView: View {
     @State private var editingTodo: TodoItem?
     @State private var editText = ""
     @State private var isAddExpanded = false
+    @AppStorage("hasSeenSetupGuide") private var hasSeenSetupGuide = false
     @FocusState private var isInputFocused: Bool
 
     private var stats: (completed: Int, total: Int, progress: Double) {
@@ -114,7 +115,7 @@ struct TodoListView: View {
                     addTodoBar
                 }
             }
-            .navigationTitle("Todo Wallpaper")
+            .navigationTitle("Taskwall")
             .navigationBarTitleDisplayMode(.large)
             .toolbarColorScheme(.dark, for: .navigationBar)
             .toolbar {
@@ -160,6 +161,12 @@ struct TodoListView: View {
             }
         }
         .preferredColorScheme(.dark)
+        .onAppear {
+            if !hasSeenSetupGuide {
+                hasSeenSetupGuide = true
+                showingAutoSetupGuide = true
+            }
+        }
     }
 
     // MARK: - Stats Card

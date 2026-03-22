@@ -172,7 +172,7 @@ struct WallpaperTemplateView: View {
                 // Footer
                 HStack {
                     Spacer()
-                    Text("TodoWallpaper")
+                    Text("Taskwall")
                         .font(.system(size: 11 * scaleFactor, weight: .medium))
                         .foregroundStyle(.white.opacity(0.15))
                         .tracking(2)

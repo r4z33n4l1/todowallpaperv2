@@ -93,7 +93,7 @@ struct WallpaperPreviewView: View {
                             }
                             .disabled(isSaving)
 
-                            Text("Saved wallpapers appear in your **TodoWallpaper** album")
+                            Text("Saved wallpapers appear in your **Taskwall** album")
                                 .font(.caption)
                                 .foregroundStyle(.white.opacity(0.4))
                                 .multilineTextAlignment(.center)
@@ -134,7 +134,7 @@ struct WallpaperPreviewView: View {
                     dismiss()
                 }
             } message: {
-                Text("Your wallpaper has been saved to the TodoWallpaper album in Photos.")
+                Text("Your wallpaper has been saved to the Taskwall album in Photos.")
             }
             .alert("Photo Access Required", isPresented: $showPermissionDenied) {
                 Button("Open Settings") {
@@ -144,7 +144,7 @@ struct WallpaperPreviewView: View {
                 }
                 Button("Cancel", role: .cancel) { }
             } message: {
-                Text("TodoWallpaper needs access to your photo library to save wallpapers. Please enable it in Settings.")
+                Text("Taskwall needs access to your photo library to save wallpapers. Please enable it in Settings.")
             }
         }
         .presentationDetents([.large])
