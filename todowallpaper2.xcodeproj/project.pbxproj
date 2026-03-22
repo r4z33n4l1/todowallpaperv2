@@ -292,7 +292,6 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_NSPhotoLibraryAddUsageDescription = "TodoWallpaper saves generated wallpapers to your photo library.";
 				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "TodoWallpaper needs photo library access to save wallpapers to the TodoWallpaper album.";
-				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "TodoWallpaper needs photo library access to save wallpapers to the TodoWallpaper album.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;

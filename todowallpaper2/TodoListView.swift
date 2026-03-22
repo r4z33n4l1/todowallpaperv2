@@ -17,6 +17,7 @@ struct TodoListView: View {
 
     @State private var newTodoTitle = ""
     @State private var showingWallpaperPreview = false
+    @State private var showingAutoSetupGuide = false
     @State private var editingTodo: TodoItem?
     @State private var editText = ""
     @State private var isAddExpanded = false
@@ -117,6 +118,16 @@ struct TodoListView: View {
             .navigationBarTitleDisplayMode(.large)
             .toolbarColorScheme(.dark, for: .navigationBar)
             .toolbar {
+                ToolbarItem(placement: .topBarLeading) {
+                    Button {
+                        showingAutoSetupGuide = true
+                    } label: {
+                        Image(systemName: "sparkles")
+                            .symbolRenderingMode(.hierarchical)
+                            .foregroundStyle(.purple)
+                            .font(.title3)
+                    }
+                }
                 ToolbarItem(placement: .topBarTrailing) {
                     Button {
                         showingWallpaperPreview = true
@@ -131,6 +142,9 @@ struct TodoListView: View {
             }
             .sheet(isPresented: $showingWallpaperPreview) {
                 WallpaperPreviewView(todos: todos)
+            }
+            .sheet(isPresented: $showingAutoSetupGuide) {
+                AutoWallpaperGuideView()
             }
             .alert("Edit Todo", isPresented: Binding(
                 get: { editingTodo != nil },
