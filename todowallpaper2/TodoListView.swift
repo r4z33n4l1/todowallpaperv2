@@ -16,11 +16,14 @@ struct TodoListView: View {
     private var todos: [TodoItem]
 
     @State private var newTodoTitle = ""
-    @State private var showingWallpaperPreview = false
     @State private var showingAutoSetupGuide = false
     @State private var editingTodo: TodoItem?
     @State private var editText = ""
     @State private var isAddExpanded = false
+    @State private var isSavingWallpaper = false
+    @State private var wallpaperSaved = false
+    @State private var wallpaperError: String?
+    @State private var showPermissionDenied = false
     @AppStorage("hasSeenSetupGuide") private var hasSeenSetupGuide = false
     @FocusState private var isInputFocused: Bool
 
@@ -131,21 +134,41 @@ struct TodoListView: View {
                 }
                 ToolbarItem(placement: .topBarTrailing) {
                     Button {
-                        showingWallpaperPreview = true
+                        Task { await generateAndSave() }
                     } label: {
-                        Image(systemName: "photo.on.rectangle")
-                            .symbolRenderingMode(.hierarchical)
-                            .foregroundStyle(.cyan)
-                            .font(.title3)
+                        if isSavingWallpaper {
+                            ProgressView()
+                                .tint(.cyan)
+                        } else {
+                            Image(systemName: wallpaperSaved ? "checkmark.circle.fill" : "photo.on.rectangle")
+                                .symbolRenderingMode(.hierarchical)
+                                .foregroundStyle(wallpaperSaved ? .green : .cyan)
+                                .font(.title3)
+                        }
                     }
-                    .disabled(todos.isEmpty)
+                    .disabled(todos.isEmpty || isSavingWallpaper)
                 }
-            }
-            .sheet(isPresented: $showingWallpaperPreview) {
-                WallpaperPreviewView(todos: todos)
             }
             .sheet(isPresented: $showingAutoSetupGuide) {
                 AutoWallpaperGuideView()
+            }
+            .alert("Photo Access Required", isPresented: $showPermissionDenied) {
+                Button("Open Settings") {
+                    if let url = URL(string: UIApplication.openSettingsURLString) {
+                        UIApplication.shared.open(url)
+                    }
+                }
+                Button("Cancel", role: .cancel) { }
+            } message: {
+                Text("Taskwall needs access to your photo library to save wallpapers. Please enable it in Settings.")
+            }
+            .alert("Error", isPresented: Binding(
+                get: { wallpaperError != nil },
+                set: { if !$0 { wallpaperError = nil } }
+            )) {
+                Button("OK", role: .cancel) { }
+            } message: {
+                Text(wallpaperError ?? "")
             }
             .alert("Edit Todo", isPresented: Binding(
                 get: { editingTodo != nil },
@@ -210,7 +233,7 @@ struct TodoListView: View {
 
             // Generate button
             Button {
-                showingWallpaperPreview = true
+                Task { await generateAndSave() }
             } label: {
                 HStack(spacing: 6) {
                     Image(systemName: "wand.and.stars")
@@ -229,7 +252,7 @@ struct TodoListView: View {
                 .foregroundStyle(.white)
                 .clipShape(Capsule())
             }
-            .disabled(todos.isEmpty)
+            .disabled(todos.isEmpty || isSavingWallpaper)
         }
         .padding(16)
         .background {
@@ -362,6 +385,30 @@ struct TodoListView: View {
             let todo = TodoItem(title: title, sortOrder: maxOrder + 1)
             modelContext.insert(todo)
             newTodoTitle = ""
+        }
+    }
+
+    @MainActor
+    private func generateAndSave() async {
+        isSavingWallpaper = true
+        wallpaperSaved = false
+        defer { isSavingWallpaper = false }
+
+        guard let image = WallpaperGenerator.generate(todos: todos) else {
+            wallpaperError = "Failed to generate wallpaper image."
+            return
+        }
+
+        do {
+            try await PhotoLibraryManager.saveToAlbum(image)
+            wallpaperSaved = true
+            // Reset checkmark after 3 seconds
+            try? await Task.sleep(for: .seconds(3))
+            wallpaperSaved = false
+        } catch is PhotoLibraryManager.PhotoError {
+            showPermissionDenied = true
+        } catch {
+            wallpaperError = error.localizedDescription
         }
     }
 
