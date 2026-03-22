@@ -23,7 +23,7 @@ struct GenerateWallpaperIntent: AppIntent {
     static let openAppWhenRun: Bool = true
 
     @MainActor
-    func perform() async throws -> some IntentResult & ReturnsValue<IntentFile> {
+    func perform() async throws -> some IntentResult & ReturnsValue<IntentFile> & ProvidesDialog {
         // Small delay to let the app's UI context initialize when launched by Shortcuts
         try? await Task.sleep(for: .milliseconds(500))
 
